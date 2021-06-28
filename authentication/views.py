@@ -1,7 +1,9 @@
 import re
+from os import getenv
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from requests import get as get_request
+from requests import get as get_request, exceptions as requests_exceptions
+from jwt import encode as encode_jwt
 from .models import User
 
 
@@ -14,16 +16,19 @@ def index(request):
         PARAMS = {'id_token': request.body.strip()}
 
         # verify if JWT is from Google and get user object from Google
-        user_object = get_request(
-            url='https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=',
-            params=PARAMS
-        ).json()
+        try:
+            r = get_request(
+                url='https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=',
+                params=PARAMS
+            )
 
-        if 'error_description' in user_object:
+            r.raise_for_status()
+
+            user_object = r.json()
+        except requests_exceptions.RequestException as error:
             return HttpResponse(
-                'Error occurred while verifying user. Error: {}'.format(
-                    user_object['error_description']),
-                status=400
+                'Error occurred while making a request to Google, token may have expired or is malformed',
+                status=error.response.status_code
             )
 
         # check if account is from students.edu.sg and is verified
@@ -47,10 +52,19 @@ def index(request):
             )
 
             user.save()
-            return HttpResponse('Created user and set cookie in response header')
-        else:
-            # user already exists
-            return HttpResponse('Existing user, set cookie in response header')
+
+        # set cookie
+        user = User.objects.get(google_id=google_id)
+        user_token = encode_jwt({
+            'avatar': user.avatar_url,
+            'name': user.name,
+            'firstName': user.first_name
+        }, getenv('JWT_SECRET'))
+
+        response = HttpResponse('Logged in successfully.')
+        response.set_cookie('token', user_token)
+
+        return response
 
     else:
         return HttpResponse('Server does not know how to handle your method', status=400)
