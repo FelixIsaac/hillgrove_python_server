@@ -10,7 +10,7 @@ class User(models.Model):
     name = models.CharField(max_length=254)
     first_name = models.CharField(max_length=254)
     family_name = models.CharField(max_length=254)
-    created_on = models.DateTimeField()
+    created_on = models.DateTimeField(auto_now_add=True)
     xp = models.PositiveIntegerField(default=100)
 
     def avatar_urL(self):
