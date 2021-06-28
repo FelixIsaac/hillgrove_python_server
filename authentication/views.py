@@ -1,4 +1,5 @@
 import re
+from datetime import datetime, timedelta
 from os import getenv
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -58,12 +59,11 @@ def index(request):
         user_token = encode_jwt({
             'avatar': user.avatar_url,
             'name': user.name,
-            'firstName': user.first_name
+            'firstName': user.first_name,
+            'exp': int(datetime.now().timestamp() + 1.21e+6)
         }, getenv('JWT_SECRET'))
 
-        response = HttpResponse('Logged in successfully.')
-        response.set_cookie('token', user_token)
-
+        response = HttpResponse(user_token)
         return response
 
     else:
