@@ -32,8 +32,8 @@ def index(request):
                 status=error.response.status_code
             )
 
-        # check if account is from students.edu.sg and is verified
-        if user_object['hd'] != 'students.edu.sg' and not user_object['email_verified']:
+        # check if account is from *.edu.sg and is verified
+        if not "edu.sg" in user_object['email'].split('@')[1] or not user_object['email_verified']:
             return HttpResponse('', status=400)
 
         google_id = user_object['sub']
@@ -41,11 +41,10 @@ def index(request):
         # create new record if user does not exist
         if not User.objects.filter(google_id=google_id).exists():
             # get only avatar ID
-            avatar = re.findall('\w{43}', user_object['picture'])[0]
 
             user = User(
                 google_id=google_id,
-                avatar=avatar,
+                avatar=user_object['picture'],
                 email=user_object['email'],
                 name=user_object['name'],
                 first_name=user_object['given_name'],
@@ -57,7 +56,7 @@ def index(request):
         # set cookie
         user = User.objects.get(google_id=google_id)
         user_token = encode_jwt({
-            'avatar': user.avatar_url,
+            'avatar': user.avatar,
             'name': user.name,
             'firstName': user.first_name,
             'exp': int(datetime.now().timestamp() + 1.21e+6)
