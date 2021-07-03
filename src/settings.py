@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = not strtobool(os.getenv('PRODUCTION')) and strtobool(os.getenv('DEBUG'))
 if DEBUG: print('Debug mode')
 
-ALLOWED_HOSTS = ['localhost', 'https://hillgrove-python.herokuapp.com', 'https://hillgrove.codes']
+ALLOWED_HOSTS = ['localhost', 'hillgrove-python.herokuapp.com', 'https://hillgrove.codes']
 
 CORS_ORIGIN_ALLOW_ALL = False
 
