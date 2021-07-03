@@ -8,13 +8,20 @@ from requests import get as get_request, exceptions as requests_exceptions
 from jwt import encode as encode_jwt
 from .models import User
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
 
 @csrf_exempt
 def index(request):
     if request.method == 'GET':
         return HttpResponse('Backend server made with Python, Hello World! Authentication APIs with Google goes here')
     elif request.method == 'POST':
-        loggin.info('Authenticating user login')
+        logging.info('Authenticating user login')
 
         # parse JSON request body
         PARAMS = {'id_token': request.body.strip()}
@@ -29,9 +36,9 @@ def index(request):
             r.raise_for_status()
 
             user_object = r.json()
-            loggin.info('Successfully exchanged tokeninfo with Google')
+            logging.info('Successfully exchanged tokeninfo with Google')
         except requests_exceptions.RequestException as error:
-            loggin.error('Error occured while exhcanging tokeninfo with Google', error)
+            logging.error('Error occured while exhcanging tokeninfo with Google', error)
             return HttpResponse(
                 'Error occurred while making a request to Google, token may have expired or is malformed',
                 status=error.response.status_code
@@ -39,14 +46,14 @@ def index(request):
 
         # check if account is from *.edu.sg and is verified
         if not "edu.sg" in user_object['email'].split('@')[1] or not user_object['email_verified']:
-            loggin.warning('User logged in with non *.edu.sg account')
+            logging.warning('User logged in with non *.edu.sg account')
             return HttpResponse('Invalid email', status=401)
 
         google_id = user_object['sub']
 
         # create new record if user does not exist
         if not User.objects.filter(google_id=google_id).exists():
-            loggin.info('Creating new user account')
+            logging.info('Creating new user account')
 
             user = User(
                 google_id=google_id,
@@ -60,7 +67,7 @@ def index(request):
             user.save()
 
         # set cookie
-        loggin.info('Creating new JWT for cookie')
+        logging.info('Creating new JWT for cookie')
 
 
         user = User.objects.get(google_id=google_id)
@@ -71,7 +78,7 @@ def index(request):
             'exp': int(datetime.now().timestamp() + 1.21e+6)
         }, getenv('JWT_SECRET'))
 
-        loggin.info('Sending successful user token response')
+        logging.info('Sending successful user token response')
         response = HttpResponse(user_token)
         return response
 
