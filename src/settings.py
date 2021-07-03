@@ -11,11 +11,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
-import logging
 from pathlib import Path
 from dotenv import load_dotenv
 from distutils.util import strtobool
-from logdna import LogDNAHandler
 
 load_dotenv()
 
@@ -148,14 +146,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-#  logging
-log = logging.getLogger('logdna')
-log.setLevel(logging.INFO)
-log_handler = LogDNAHandler(os.environ['LOGDNA_KEY'], { 'index_meta': True })
-log.addHandler(log_handler)
