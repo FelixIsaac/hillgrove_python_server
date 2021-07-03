@@ -11,9 +11,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+import logging
 from pathlib import Path
 from dotenv import load_dotenv
 from distutils.util import strtobool
+from logdna import LogDNAHandler
 
 load_dotenv()
 
@@ -151,3 +153,10 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#  logging
+log = logging.getLogger('logdna')
+log.setLevel(logging.INFO)
+options['index_meta'] = True
+log_handler = LogDNAHandler(os.environ['LOGDNA_KEY'])
+log.addHandler(log_handler)
