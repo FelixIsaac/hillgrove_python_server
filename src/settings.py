@@ -30,11 +30,16 @@ if DEBUG: print('Debug mode')
 ALLOWED_HOSTS = ['localhost', 'https://hillgrove-python.herokuapp.com', 'https://hillgrove.codes']
 
 CORS_ORIGIN_ALLOW_ALL = False
+
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
     'https://hillgrove.codes'
 )
 
+CORS_ALLOWED_ORIGINS  = [
+    "http://localhost:3000",
+    'https://hillgrove.codes'
+]
 
 # Application definition
 
