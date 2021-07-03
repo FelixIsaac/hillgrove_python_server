@@ -157,6 +157,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #  logging
 log = logging.getLogger('logdna')
 log.setLevel(logging.INFO)
-options['index_meta'] = True
-log_handler = LogDNAHandler(os.environ['LOGDNA_KEY'])
+log_handler = LogDNAHandler(os.environ['LOGDNA_KEY'], { 'index_meta': True })
 log.addHandler(log_handler)
