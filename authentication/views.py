@@ -2,10 +2,9 @@ import re
 import logging
 from datetime import datetime, timedelta
 from os import getenv
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, JsonResponse
 from requests import get as get_request, exceptions as requests_exceptions
-from jwt import encode as encode_jwt
+from jwt import encode as encode_jwt, decode as decode_jwt
 from .models import User
 
 logging.basicConfig(
@@ -16,7 +15,6 @@ logging.basicConfig(
     ]
 )
 
-@csrf_exempt
 def index(request):
     if request.method == 'GET':
         return HttpResponse('Backend server made with Python, Hello World! Authentication APIs with Google goes here')
@@ -75,8 +73,9 @@ def index(request):
             'avatar': user.avatar,
             'name': user.name,
             'firstName': user.first_name,
-            'exp': int(datetime.now().timestamp() + 1.21e+6)
-        }, getenv('JWT_SECRET'))
+            'exp': int(datetime.now().timestamp() + 1.21e+6),
+            'googleId': google_id
+        }, getenv('JWT_SECRET'), algorithm="HS256")
 
         logging.info('Sending successful user token response')
         response = HttpResponse(user_token)
@@ -84,3 +83,20 @@ def index(request):
 
     else:
         return HttpResponse('Server does not know how to handle your method', status=400)
+
+def get_email(request):
+    if request.method != 'GET':
+        return HttpResponse('Server does not know how to handle your method', status=400)
+
+    if 'Authorization' not in request.headers:
+        return HttpResponse('Missing authorization header', status=401)
+
+    user_token = request.headers.get('Authorization');
+
+    try:
+        payload = decode_jwt(user_token, getenv('JWT_SECRET'), algorithms='HS256')
+    except Exception as error:
+        return HttpResponse('Invalid JWT token', status=401)
+
+    user = User.objects.get(google_id=payload['googleId'])
+    return JsonResponse({ 'email': user.email })
