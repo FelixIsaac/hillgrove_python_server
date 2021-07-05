@@ -26,10 +26,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = not strtobool(os.getenv('PRODUCTION')) and strtobool(os.getenv('DEBUG'))
-if DEBUG: print('Debug mode')
+DEBUG = not strtobool(os.getenv('PRODUCTION')
+                      ) and strtobool(os.getenv('DEBUG'))
+if DEBUG:
+    print('Debug mode')
 
-ALLOWED_HOSTS = ['localhost', 'hillgrove-python.herokuapp.com', 'https://hillgrove.codes']
+ALLOWED_HOSTS = ['localhost',
+                 'hillgrove-python.herokuapp.com', 'https://hillgrove.codes']
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
@@ -39,7 +42,7 @@ CORS_ORIGIN_WHITELIST = (
     'https://hillgrove.codes'
 )
 
-CORS_ALLOWED_ORIGINS  = [
+CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     'https://hillgrove.codes'
 ]
@@ -48,6 +51,8 @@ CORS_ALLOWED_ORIGINS  = [
 
 INSTALLED_APPS = [
     'authentication',
+    'users',
+    'session',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
