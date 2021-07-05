@@ -59,7 +59,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django_cookies_samesite.middleware.CookiesSameSite',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,11 +78,11 @@ if bool(strtobool(os.getenv('PRODUCTION'))):
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'None';
     SECURE_HSTS_PRELOAD = True
     SESSION_COOKIE_SAMESITE = 'None'
     SESSION_COOKIE_SAMESITE_FORCE_ALL = True
     SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
 
 TEMPLATES = [
     {
