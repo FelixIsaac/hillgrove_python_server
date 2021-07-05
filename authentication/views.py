@@ -6,6 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from requests import get as get_request, exceptions as requests_exceptions
 from jwt import encode as encode_jwt, decode as decode_jwt
+from distutils.util import strtobool
 from .models import User
 
 logging.basicConfig(
@@ -79,11 +80,16 @@ def index(request):
             'googleId': google_id
         }, getenv('JWT_SECRET'), algorithm="HS256")
 
+
         logging.info('Sending successful user token response')
         response = HttpResponse()
-        response.set_cookie('token', user_token)
-        return response
 
+        if bool(strtobool(getenv('PRODUCTION'))):
+            response.set_cookie('token', user_token, samesite=True, secure=True)
+        else:
+            response.set_cookie('token', user_token)
+
+        return response
     else:
         return HttpResponse('Server does not know how to handle your method', status=400)
 
