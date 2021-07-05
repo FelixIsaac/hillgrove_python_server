@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timedelta
 from os import getenv
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from requests import get as get_request, exceptions as requests_exceptions
 from jwt import encode as encode_jwt, decode as decode_jwt
 from .models import User
@@ -15,6 +16,7 @@ logging.basicConfig(
     ]
 )
 
+@ensure_csrf_cookie
 def index(request):
     if request.method == 'GET':
         return HttpResponse('Backend server made with Python, Hello World! Authentication APIs with Google goes here')
@@ -78,12 +80,14 @@ def index(request):
         }, getenv('JWT_SECRET'), algorithm="HS256")
 
         logging.info('Sending successful user token response')
-        response = HttpResponse(user_token)
+        response = HttpResponse()
+        response.set_cookie('token', user_token)
         return response
 
     else:
         return HttpResponse('Server does not know how to handle your method', status=400)
 
+@csrf_exempt
 def get_email(request):
     if request.method != 'GET':
         return HttpResponse('Server does not know how to handle your method', status=400)

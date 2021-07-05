@@ -31,6 +31,7 @@ if DEBUG: print('Debug mode')
 
 ALLOWED_HOSTS = ['localhost', 'hillgrove-python.herokuapp.com', 'https://hillgrove.codes']
 
+CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = (
