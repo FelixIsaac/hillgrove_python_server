@@ -21,8 +21,3 @@ class User(models.Model):
     def update_avatar(self, avatar, *args, **kwargs):
         self.avatar = avatar
         super(User, self).save(*args, **kwargs)
-
-
-# class Session(models.Model):
-#     name = models.CharField(max_length=100)
-#     description = models.CharField(max_length=300)

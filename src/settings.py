@@ -31,8 +31,8 @@ if DEBUG: print('Debug mode')
 
 ALLOWED_HOSTS = ['localhost', 'hillgrove-python.herokuapp.com', 'https://hillgrove.codes']
 
-CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
@@ -78,11 +78,7 @@ if bool(strtobool(os.getenv('PRODUCTION'))):
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    CSRF_COOKIE_SAMESITE = None;
     SECURE_HSTS_PRELOAD = True
-    SESSION_COOKIE_SAMESITE = None;
-    SESSION_COOKIE_SAMESITE_FORCE_ALL = True
-    SESSION_COOKIE_SECURE = True
 
 TEMPLATES = [
     {
