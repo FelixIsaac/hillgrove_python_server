@@ -10,8 +10,6 @@ class Topic(models.Model):
     def url(self):
         return re.sub(r'[\W_]+', '-', self.name).lower()
 
-# Create your models here.
-
 
 class Session(models.Model):
     name = models.CharField(max_length=64, unique=True)
