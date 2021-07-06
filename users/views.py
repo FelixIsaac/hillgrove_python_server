@@ -23,7 +23,6 @@ def progress(request, session=None):
             'message': 'Missing authorization header'
         }, status=401)
 
-    body = load_json(request.body)
     user_token = request.headers.get('Authorization')
 
     try:
@@ -65,10 +64,8 @@ def progress(request, session=None):
 
             return JsonResponse({
                 'error': False,
-                'last_session': progress[0].last_session.url,
-                'last_topic': progress[0].last_topic.url,
-                'last_session_name': progress[0].last_session.name,
-                'last_topic_name': progress[0].last_session.name
+                'last_session': progress[0].last_session.name,
+                'last_topic': progress[0].last_session.name
             })
         else:
             try:
@@ -81,10 +78,8 @@ def progress(request, session=None):
 
             def mapProgress(progress_item):
                 return {
-                    'last_session': progress_item.last_session.url,
-                    'last_topic': progress_item.last_topic.url,
-                    'last_session_name': progress_item.last_session.name,
-                    'last_topic_name': progress_item.last_session.name
+                    'last_session': progress_item.last_session.name,
+                    'last_topic': progress_item.last_session.name
                 }
 
             return JsonResponse({
@@ -92,6 +87,8 @@ def progress(request, session=None):
                 'sessions': list(map(mapProgress, progress))
             })
     elif request.method == 'PATCH':
+        body = load_json(request.body)
+
         try:
             session = Session.objects.get(name=body['last_session'])
             topic = Topic.objects.get(name=body['last_topic'])
