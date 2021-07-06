@@ -9,7 +9,7 @@ from .models import Progress
 
 
 @csrf_exempt
-def progress(request):
+def progress(request, session=None):
     if request.method not in ['GET', 'PATCH']:
         return JsonResponse({
             'error': True,
@@ -45,21 +45,52 @@ def progress(request):
 
     # actual route code
     if request.method == 'GET':
-        try:
-            progress = Progress.objects.get(user=user)
-        except:
-            return JsonResponse({
-                'error': True,
-                'message': 'Progress not found'
-            })
+        if session:
+            try:
+                progress = Progress.objects.filter(
+                    user=user,
+                    last_session__id=session
+                )
+            except:
+                return JsonResponse({
+                    'error': True,
+                    'message': 'Progress not found'
+                })
 
-        return JsonResponse({
-            'error': False,
-            'last_session': progress.last_session.url,
-            'last_topic': progress.last_topic.url,
-            'last_session_name': progress.last_session.name,
-            'last_topic_name': progress.last_session.name
-        })
+            if not len(progress):
+                return JsonResponse({
+                    'error': True,
+                    'message': 'Progress not found'
+                })
+
+            return JsonResponse({
+                'error': False,
+                'last_session': progress[0].last_session.url,
+                'last_topic': progress[0].last_topic.url,
+                'last_session_name': progress[0].last_session.name,
+                'last_topic_name': progress[0].last_session.name
+            })
+        else:
+            try:
+                progress = Progress.objects.filter(user=user)
+            except:
+                return JsonResponse({
+                    'error': True,
+                    'message': 'Progress not found'
+                })
+
+            def mapProgress(progress_item):
+                return {
+                    'last_session': progress_item.last_session.url,
+                    'last_topic': progress_item.last_topic.url,
+                    'last_session_name': progress_item.last_session.name,
+                    'last_topic_name': progress_item.last_session.name
+                }
+
+            return JsonResponse({
+                'error': False,
+                'sessions': list(map(mapProgress, progress))
+            })
     elif request.method == 'PATCH':
         try:
             session = Session.objects.get(name=body['last_session'])
@@ -71,7 +102,7 @@ def progress(request):
             })
 
         # create progress row if there is no progress row in progress table
-        if not Progress.objects.filter(user=user).exists():
+        if not Progress.objects.filter(user=user, last_session=session).exists():
             progress = Progress(
                 user=user,
                 last_session=session,
@@ -81,7 +112,7 @@ def progress(request):
             progress.save()
         else:
             # update user progress if exists
-            progress = Progress.objects.get(user=user)
+            progress = Progress.objects.get(user=user, last_session=session)
 
             progress.last_session = session
             progress.last_topic = topic
