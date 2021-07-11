@@ -10,3 +10,10 @@ class Progress(models.Model):
 
     class Meta:
         unique_together = ('user', 'last_session')
+
+class SeenSolutions(models.Model):
+    user = models.ForeginKey(User, on_delete=models.CASCADE)
+    solution = models.ForeginKey(session.Solution, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'solution')

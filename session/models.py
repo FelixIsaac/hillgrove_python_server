@@ -20,3 +20,8 @@ class Session(models.Model):
     @property
     def url(self):
         return re.sub(r'[\W_]+', '-', self.name).lower()
+
+class Solution(models.Model):
+    name = models.CharField(max_length=64, unique=True)
+    topic = models.ForeignKey('session.Topic', on_delete=models.CASCADE)
+    solution = models.TextField()
