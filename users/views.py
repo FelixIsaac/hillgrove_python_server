@@ -2,10 +2,11 @@ from os import getenv
 from json import loads as load_json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.db.models import F
 from jwt import encode as encode_jwt, decode as decode_jwt
 from authentication.models import User
 from session.models import Session, Topic
-from .models import Progress
+from .models import Progress, SolutionProgress
 
 
 @csrf_exempt
@@ -118,4 +119,60 @@ def progress(request, session=None):
         return JsonResponse({
             'error': False,
             'message': 'Updated session'
+        })
+
+
+@csrf_exempt
+def solution_progress(request, topic, solution):
+    if not topic or not solution:
+        return JsonResponse({
+            'error': True,
+            'message': 'Topic and solution paramters needed'
+        })
+
+    if 'Authorization' not in request.headers:
+        return JsonResponse({
+            'error': True,
+            'message': 'Missing authorization header'
+        })
+
+    user_token = request.headers.get('Authorization')
+
+    try:
+        payload = decode_jwt(user_token, getenv(
+            'JWT_SECRET'), algorithms='HS256')
+    except Exception as error:
+        return JsonResponse({
+            'error': True,
+            'message': 'Invalid JWT token'
+        }, status=401)
+
+    user = User.objects.get(google_id=payload['googleId'])
+
+    if not user:
+        return JsonResponse({
+            'error': True,
+            'message': 'User not found'
+        }, status=404)
+
+    # actual route code
+    elif request.method == 'PATCH':
+        body = load_json(request.body)
+
+        SolutionProgress.objects.update_or_create(
+            user=user,
+            solution__id=solution,
+            defaults={
+                'draft_code': body.code
+            }
+        )
+        SolutionProgress.objects.update_or_create(
+            user=user,
+            solution__id=solution,
+            defaults=payload
+        )
+    else:
+        return JsonResponse({
+            'error': True,
+            'message': 'Server does not know how to handle your method'
         })
