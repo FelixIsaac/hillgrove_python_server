@@ -201,7 +201,15 @@ def solution_progress(request, topic, solution):
             progress['attempts'] = F('attempts') + 1
 
             if body['correct_solution']:
+                xp = 50
+
+                if progress['shown_hint']:
+                    xp = 40
+                elif progress['shown_solution']:
+                    xp = 30
+
                 setattr(progress, 'solution_code', body.code)
+                setattr(payload, 'xp', xp)
 
         progress.save()
 
