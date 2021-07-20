@@ -156,6 +156,22 @@ def solution_progress(request, topic, solution):
         }, status=404)
 
     # actual route code
+    if request.method == 'GET':
+        progress = SolutionProgress.objects.get(
+            user=user,
+            solution_id=solution
+        )
+
+        if not progress:
+            return JsonResponse({
+                'error': True,
+                'message': 'Solution progress not found'
+            })
+
+        return JsonResponse({
+            'error': False,
+            **progress
+        })
     elif request.method == 'PATCH':
         body = load_json(request.body)
 
@@ -166,6 +182,17 @@ def solution_progress(request, topic, solution):
                 'draft_code': body.code
             }
         )
+    elif request.method == 'POST':
+        body = load_json(request.body)
+
+        payload = {
+            'draft_code': body.code,
+            'attempts': F('attempts') + 1
+        }
+
+        if body['correct_solution']:
+            setattr(payload, 'solution_code', body.code)
+
         SolutionProgress.objects.update_or_create(
             user=user,
             solution__id=solution,
