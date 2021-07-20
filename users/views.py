@@ -3,6 +3,7 @@ from json import loads as load_json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db.models import F
+from django.forms.models import model_to_dict
 from jwt import encode as encode_jwt, decode as decode_jwt
 from authentication.models import User
 from session.models import Session, Topic
@@ -170,34 +171,44 @@ def solution_progress(request, topic, solution):
 
         return JsonResponse({
             'error': False,
-            **progress
+            'progress': model_to_dict(progress)
         })
     elif request.method == 'PATCH':
         body = load_json(request.body)
 
-        SolutionProgress.objects.update_or_create(
+        progress, _ = SolutionProgress.objects.update_or_create(
             user=user,
             solution__id=solution,
             defaults={
                 'draft_code': body.code
             }
         )
+
+        return JsonResponse({
+            'error': False,
+            'progress': model_to_dict(progress)
+        })
     elif request.method == 'POST':
         body = load_json(request.body)
 
-        payload = {
-            'draft_code': body.code,
-            'attempts': F('attempts') + 1
-        }
-
-        if body['correct_solution']:
-            setattr(payload, 'solution_code', body.code)
-
-        SolutionProgress.objects.update_or_create(
+        progress = SolutionProgress.objects.get(
             user=user,
-            solution__id=solution,
-            defaults=payload
+            solution__id=solution
         )
+
+        if progress:
+            progress['draft_code'] = body.code
+            progress['attempts'] = F('attempts') + 1
+
+            if body['correct_solution']:
+                setattr(progress, 'solution_code', body.code)
+
+        progress.save()
+
+        return JsonResponse({
+            'error': False,
+            'progress': model_to_dict(progress)
+        })
     else:
         return JsonResponse({
             'error': True,

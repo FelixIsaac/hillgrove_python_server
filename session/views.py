@@ -3,6 +3,7 @@ from os import getenv
 from json import loads as load_json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.forms.models import model_to_dict
 from jwt import encode as encode_jwt, decode as decode_jwt
 from authentication.models import User
 from users.models import SolutionProgress
@@ -144,13 +145,18 @@ def get_hint(request, topic, solution):
 
     # actual route code
     if request.method == 'GET':
-        SolutionProgress.objects.update_or_create(
+        progress, _ = SolutionProgress.objects.update_or_create(
             solution_id=solution,
             user=user,
             defaults={
                 'shown_hint': True
             }
         )
+
+        return JsonResponse({
+            'error': False,
+            'progress': model_to_dict(progress)
+        })
     else:
         return JsonResponse({
             'error': True,
