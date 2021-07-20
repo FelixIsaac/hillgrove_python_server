@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from jwt import encode as encode_jwt, decode as decode_jwt
 from authentication.models import User
+from users.models import SolutionProgress
 from .models import Session, Topic, Solution
 
 
@@ -34,6 +35,7 @@ def get_sessions(request, session=None):
             ]
         })
 
+
 @csrf_exempt
 def get_solution(request, topic, solution):
     if not topic or not solution:
@@ -52,7 +54,8 @@ def get_solution(request, topic, solution):
     user_token = request.headers.get('Authorization')
 
     try:
-        payload = decode_jwt(user_token, getenv('JWT_SECRET'), algorithms='HS256')
+        payload = decode_jwt(user_token, getenv(
+            'JWT_SECRET'), algorithms='HS256')
     except Exception as error:
         return JsonResponse({
             'error': True,
@@ -83,15 +86,73 @@ def get_solution(request, topic, solution):
             'error': True,
             'message': 'Solution not found'
         })
-        
+
     if not len(solution):
         return JsonResponse({
             'error': True,
             'message': 'Solution not found'
         })
 
+    # solution found
+    SolutionProgress.objects.update_or_create(
+        user=user,
+        solution_id=solution[0].id,
+        defaults={
+            'shown_solution': True
+        }
+    )
+
     return JsonResponse({
         'error': False,
         'solution': solution[0].solution
     })
-    
+
+
+@csrf_exempt
+def get_hint(request, topic, solution):
+    if not topic or not solution:
+        return JsonResponse({
+            'error': True,
+            'message': 'Topic and solution parameters need'
+        })
+
+     # authorization and authentication
+    if 'Authorization' not in request.headers:
+        return JsonResponse({
+            'error': True,
+            'message': 'Missing authorization header'
+        }, status=401)
+
+    user_token = request.headers.get('Authorization')
+
+    try:
+        payload = decode_jwt(user_token, getenv(
+            'JWT_SECRET'), algorithms='HS256')
+    except Exception as error:
+        return JsonResponse({
+            'error': True,
+            'message': 'Invalid JWT token'
+        }, status=401)
+
+    user = User.objects.get(google_id=payload['googleId'])
+
+    if not user:
+        return JsonResponse({
+            'error': True,
+            'message': 'User not found'
+        }, status=404)
+
+    # actual route code
+    if request.method == 'GET':
+        SolutionProgress.objects.update_or_create(
+            solution_id=solution,
+            user=user,
+            defaults={
+                'shown_hint': True
+            }
+        )
+    else:
+        return JsonResponse({
+            'error': True,
+            'message': 'Server does not know not know how to handle your method'
+        })
