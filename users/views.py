@@ -6,7 +6,7 @@ from django.db.models import F
 from django.forms.models import model_to_dict
 from jwt import encode as encode_jwt, decode as decode_jwt
 from authentication.models import User
-from session.models import Session, Topic
+from session.models import Session, Topic, Solution
 from .models import Progress, SolutionProgress
 
 
@@ -140,8 +140,7 @@ def solution_progress(request, topic, solution):
     user_token = request.headers.get('Authorization')
 
     try:
-        payload = decode_jwt(user_token, getenv(
-            'JWT_SECRET'), algorithms='HS256')
+        payload = decode_jwt(user_token, getenv('JWT_SECRET'), algorithms='HS256')
     except Exception as error:
         return JsonResponse({
             'error': True,
@@ -156,11 +155,13 @@ def solution_progress(request, topic, solution):
             'message': 'User not found'
         }, status=404)
 
+    solution_object = Solution.objects.get(name=solution)
+
     # actual route code
     if request.method == 'GET':
         progress = SolutionProgress.objects.get(
             user=user,
-            solution_id=solution
+            solution=solution_object
         )
 
         if not progress:
@@ -178,9 +179,9 @@ def solution_progress(request, topic, solution):
 
         progress, _ = SolutionProgress.objects.update_or_create(
             user=user,
-            solution__id=solution,
+            solution=solution_object,
             defaults={
-                'draft_code': body.code
+                'draft_code': body['code']
             }
         )
 
@@ -190,32 +191,36 @@ def solution_progress(request, topic, solution):
         })
     elif request.method == 'POST':
         body = load_json(request.body)
+        xp = 0
 
-        progress = SolutionProgress.objects.get(
+        progress, _ = SolutionProgress.objects.get_or_create(
             user=user,
-            solution__id=solution
+            solution=solution_object
         )
 
         if progress:
-            progress['draft_code'] = body.code
-            progress['attempts'] = F('attempts') + 1
+            progress.draft_code = body['code']
+
+            # only add attempts when user has not figured out solution
+            if not len(progress.solution_code):
+                progress.attempts = F('attempts') + 1
 
             if body['correct_solution']:
                 xp = 50
 
-                if progress['shown_hint']:
+                if progress.shown_hint:
                     xp = 40
-                elif progress['shown_solution']:
+                elif progress.shown_solution:
                     xp = 30
 
-                setattr(progress, 'solution_code', body.code)
-                setattr(payload, 'xp', xp)
+                progress.solution_code = body['code']
 
-        progress.save()
+            progress.save()
 
         return JsonResponse({
             'error': False,
-            'progress': model_to_dict(progress)
+            'progress': model_to_dict(progress),
+            'xp': xp
         })
     else:
         return JsonResponse({

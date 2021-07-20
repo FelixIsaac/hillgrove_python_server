@@ -97,7 +97,7 @@ def get_solution(request, topic, solution):
     # solution found
     SolutionProgress.objects.update_or_create(
         user=user,
-        solution_id=solution[0].id,
+        solution=solution[0],
         defaults={
             'shown_solution': True
         }
@@ -145,8 +145,10 @@ def get_hint(request, topic, solution):
 
     # actual route code
     if request.method == 'GET':
+        solution_object = Solution.objects.get(name=solution)
+
         progress, _ = SolutionProgress.objects.update_or_create(
-            solution_id=solution,
+            solution=solution_object,
             user=user,
             defaults={
                 'shown_hint': True
