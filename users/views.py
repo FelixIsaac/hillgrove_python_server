@@ -231,3 +231,41 @@ def solution_progress(request, topic, solution):
             'error': True,
             'message': 'Server does not know how to handle your method'
         })
+
+@csrf_exempt
+def get_xp(request):
+    if request.method == 'GET':
+        if 'Authorization' not in request.headers:
+            return JsonResponse({
+                'error': True,
+                'message': 'Missing authorization header'
+            })
+
+        user_token = request.headers.get('Authorization')
+
+        try:
+            payload = decode_jwt(user_token, getenv(
+                'JWT_SECRET'), algorithms='HS256')
+        except Exception as error:
+            return JsonResponse({
+                'error': True,
+                'message': 'Invalid JWT token'
+            }, status=401)
+
+        user = User.objects.get(google_id=payload['googleId'])
+
+        if not user:
+            return JsonResponse({
+                'error': True,
+                'message': 'User not found'
+            }, status=404)
+
+        return JsonResponse({
+            'error': False,
+            'xp': user.xp
+        })
+    else:
+        return JsonResponse({
+            'error': True,
+            'message': 'Server does not know how to handle your method'
+        }, status=400)
