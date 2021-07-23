@@ -193,7 +193,7 @@ def solution_progress(request, topic, solution):
         body = load_json(request.body)
         xp = 0
 
-        progress, _ = SolutionProgress.objects.get_or_create(
+        progress, created = SolutionProgress.objects.get_or_create(
             user=user,
             solution=solution_object
         )
@@ -203,9 +203,9 @@ def solution_progress(request, topic, solution):
 
             # only add attempts when user has not figured out solution
             if not len(progress.solution_code):
-                progress.attempts = F('attempts') + 1
-
-            if body['correct_solution']:
+                progress.attempts = 1 if created else F('attempts') + 1
+                
+                # User XP
                 xp = 50
 
                 if progress.shown_hint:
@@ -213,6 +213,10 @@ def solution_progress(request, topic, solution):
                 elif progress.shown_solution:
                     xp = 30
 
+                user.xp = F('xp') + xp
+                user.save()
+
+            if body['correct_solution']:
                 progress.solution_code = body['code']
 
             progress.save()
