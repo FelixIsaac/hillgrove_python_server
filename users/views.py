@@ -168,7 +168,7 @@ def solution_progress(request, topic, solution):
             return JsonResponse({
                 'error': True,
                 'message': 'Solution progress not found'
-            })
+            }, status=404)
 
         return JsonResponse({
             'error': False,
@@ -198,14 +198,20 @@ def solution_progress(request, topic, solution):
             solution=solution_object
         )
 
-        if progress:
-            progress.draft_code = body['code']
+        if not progress:
+            return JsonResponse({
+                'error': True,
+                'message': 'Solution progress not found'
+            }, status=404)
+            
+        progress.draft_code = body['code']
 
-            # only add attempts when user has not figured out solution
-            if not len(progress.solution_code):
-                progress.attempts = 1 if created else F('attempts') + 1
-                
-                # User XP
+        # only add attempts when user has not figured out solution
+        if not progress.solution_code:
+            progress.attempts = 1 if created else F('attempts') + 1
+            
+            # give XP when solution is correct
+            if body['correct_solution']:
                 xp = 50
 
                 if progress.shown_hint:
@@ -216,14 +222,13 @@ def solution_progress(request, topic, solution):
                 user.xp = F('xp') + xp
                 user.save()
 
-            if body['correct_solution']:
-                progress.solution_code = body['code']
+        if body['correct_solution']:
+            progress.solution_code = body['code']
 
-            progress.save()
+        progress.save()
 
         return JsonResponse({
             'error': False,
-            'progress': model_to_dict(progress),
             'xp': xp
         })
     else:
@@ -244,8 +249,7 @@ def get_xp(request):
         user_token = request.headers.get('Authorization')
 
         try:
-            payload = decode_jwt(user_token, getenv(
-                'JWT_SECRET'), algorithms='HS256')
+            payload = decode_jwt(user_token, getenv('JWT_SECRET'), algorithms='HS256')
         except Exception as error:
             return JsonResponse({
                 'error': True,
