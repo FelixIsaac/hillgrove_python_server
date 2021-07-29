@@ -9,9 +9,11 @@ INSERT INTO session_session(id, name, description, enabled) VALUES
     );
 	(
         2,
-        'Flow Control & Object Oriented Programming',
-        , ''
-        , FALSE
+        'Further introduction to Python programming'
+        , 'Students at the end of this session will learn class methods, functions, '
+          'python operators, conditionals, and loops. They will also be introduced with new '
+          'Python sequence data types. Such as list, range and tuples.'
+        , TRUE
     ),
 	-- (
     --     3,
@@ -47,8 +49,15 @@ INSERT INTO session_topic(name, session_id) VALUES
     ('Builtin Functions', 1),
     ('Type Conversion', 1);
 
--- INSERT INTO session_topic(name, session_id) VALUES
---     ('', 2)
+INSERT INTO session_topic(name, session_id) VALUES
+    ('String Methods', 2),
+    ('Python Operators', 2),
+    ('Conditionals', 2),
+    ('Python functions', 2),
+    ('Sequence Data Types: List', 2),
+    ('Sequence Data Types: Tuples', 2),
+    ('Loops', 2),
+    ('Sequence Data Types: Range', 2);
 
 INSERT INTO session_solution(name, topic_id, solution) VALUES
     (
