@@ -22,12 +22,12 @@ INSERT INTO session_session(id, name, description, enabled) VALUES
           'mathematic functions in Python!'
         , TRUE
     ),
-	-- (
-    --     4,
-    --     'Python advanced topics and file handling'
-    --     , ''
-    --     , FALSE
-    -- ),
+	(
+        4,
+        'Multiplication Table Project'
+        , 'Students will make a project based on real-world applications'
+        , TRUE
+    ),
 	-- (
     --     5,
     --     'Data Science Introduction using Python'
@@ -71,6 +71,9 @@ INSERT INTO session_topic(name, session_id) VALUES
     ('Return Keyword', 3),
     ('Unpacking', 3);
 
+INSERT INTO session_topic(name, session_id) VALUES
+    ('Multiplication Project', 4);
+
 INSERT INTO session_solution(name, topic_id, solution) VALUES
     (
         'data-types-exercise'
@@ -78,4 +81,33 @@ INSERT INTO session_solution(name, topic_id, solution) VALUES
         , 'patient_name = "John Smith"'||E'\n'||
           'patient_age = 20'||E'\n'||
           'new_patient = True'
+    ),
+    (
+        'multiplication-project'
+        , 57
+        ,   'from random import randint'||E'\n\n'||
+            'def generate_question():'||E'\n'||
+            '    return tuple(randint(0, 10) for _ in range(2))'||E'\n\n'||
+            'def quiz(questions):'||E'\n'||
+            '    marks = 0'||E'\n\n'||
+            '    for _ in range(questions):'||E'\n'||
+            '        question = generate_question()'||E'\n'||
+            '        formatted_question = f"{question[0]} x {question[1]}"'||E'\n'||
+            '        answer = question[0] * question[1]'||E'\n\n'||
+            '        user_input = int(input("What is {}? ".format(formatted_question)))'||E'\n\n'||
+            '        if user_input == answer:'||E'\n'||
+            '            # user answered question correctly!'||E'\n'||
+            '            marks += 1'||E'\n\n'||
+            '    # quiz ended'||E'\n'||
+            '    print("You scored {}/{}".format(marks, questions))'||E'\n\n'||
+            'def run():'||E'\n'||
+            '    while True:'||E'\n'||
+            '        questions = int(input("How many questions multiplication questions do you want? "))'||E'\n\n'||
+            '        if questions < 3:'||E'\n'||
+            '            print("That is not enough questions! Try again.")'||E'\n'||
+            '        else:'||E'\n'||
+            '            quiz(questions)'||E'\n'||
+            '            break'||E'\n\n'||
+            '# start the program'||E'\n'||
+            '# run()'
     );
