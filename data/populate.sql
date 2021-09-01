@@ -15,27 +15,28 @@ INSERT INTO session_session(id, name, description, enabled) VALUES
           'Python sequence data types. Such as list, range and tuples.'
         , TRUE
     ),
-	-- (
-    --     3,
-    --     'Python Modules, Frameworks, and Libraries',
-    --     , ''
-    --     , FALSE  
-    -- ),
+	(
+        3,
+        'Intermediate Python'
+        , 'Students will learn more complex concepts such as infinite loops, nested loops, and '
+          'mathematic functions in Python!'
+        , TRUE
+    ),
 	-- (
     --     4,
-    --     'Python advanced topics and file handling',
+    --     'Python advanced topics and file handling'
     --     , ''
     --     , FALSE
     -- ),
 	-- (
     --     5,
-    --     'Data Science Introduction using Python',
+    --     'Data Science Introduction using Python'
     --     , ''
     --     , FALSE
     -- ),
 	-- (
     --     6,
-    --     'Advanced Python with Code Introspection',
+    --     'Advanced Python with Code Introspection'
     --     , ''
     --     , FALSE
     -- );
@@ -58,6 +59,17 @@ INSERT INTO session_topic(name, session_id) VALUES
     ('Sequence Data Types: Tuples', 2),
     ('Loops', 2),
     ('Sequence Data Types: Range', 2);
+
+INSERT INTO session_topic(name, session_id) VALUES
+    ('Escape Characters', 3),
+    ('Formatting Strings', 3),
+    ('Keyword Arguments', 3),
+    ('More Data Types', 3),
+    ('Infinite Loops', 3),
+    ('Nested Loops', 3),
+    ('Python Math', 3),
+    ('Return Keyword', 3),
+    ('Unpacking', 3);
 
 INSERT INTO session_solution(name, topic_id, solution) VALUES
     (
